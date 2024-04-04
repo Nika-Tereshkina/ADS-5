@@ -19,82 +19,82 @@ switch (c) {
     }
 }
 std::string infx2pstfx(std::string inf) {
-std::string postfix, temp;
-TStack<char, 100> operators;
-for (auto& ch : inf) {
-    int priority = GetPriority(ch);
-    if (priority == -1) {
-        postfix += ch;
-        postfix += ' ';
+  std::string r, r1;
+  TStack<char, 100>stack1;
+  for (auto& c : inf) {
+    int p = GetPriority(c);
+    if (p == -1) {
+      r = r + с + ' ';
     } else {
-        char top = operators.get();
-        if (priority == 0 || GetPriority(top) < priority || operators.isEmpty()) {
-            operators.push(ch);
+      char element = stack1.get();
+      if (p == 0 || GetPriority(elem) < p || stack1.isEmpty()) {
+        stack1.push(c);
+      } else {
+        if (c == ')') {
+          while (GetPriority(element) >= p) {
+            r = r + element + ' ';
+            stack1.pop();
+            element = stack1.get();
+          }
+          stack1.pop();
         } else {
-            if (ch == ')') {
-                while (GetPriority(top) >= priority) {
-                    postfix += top;
-                    postfix += ' ';
-                    operators.pop();
-                    top = operators.get();
-                }
-                operators.pop();
-                } else {
-                    while (GetPriority(top) >= priority) {
-                        postfix += top;
-                        postfix += ' ';
-                        operators.pop();
-                        top = operators.get();
-                     }
-                     operators.push(ch);
-                }
-            }
-       }
+          while (GetPriority(element) >= p) {
+            r = r + element + ' ';
+            stack1.pop();
+            element = stack1.get();
+          }
+          stack1.push(c);
+        }
+      }
     }
-    while (!operators.isEmpty()) {
-        postfix += operators.get();
-        postfix += ' ';
-        operators.pop();
-    }
-    return postfix;
+  }
+  while (!stack1.isEmpty()) {
+    r = r + stack1.get() + ' ';
+    stack1.pop();
+  }
+  for (int i = 0; i < r.size() - 1; i++)
+    r1 += r[i];
+  return r1;
 }
-int calculate(const int& op1, const int& op2, const char& oper) {
-switch (oper) {
+
+int schetchik(const int& p, const int& q, const int& c) {
+  switch (c) {
     case '+':
-        return op1 + op2;
+      return p + q;
     case '-':
-        return op1 - op2;
+      return p - q;
     case '/':
-        return op1 / op2;
+      return p / q;
     case '*':
-        return op1 * op2;
+      return p * q;
     default:
-        return 0;
-    }
+      return 0;
+  }
 }
+
 int eval(std::string pref) {
-TStack<int, 100> operands;
-std::string temp = "";
-for (int i = 0; i < pref.size(); i++) {
-    char ch = pref[i];
-    if (GetPriority(ch) == -1) {
-        if (pref[i] == ' ') {
-            continue;
-        } else if (std::isdigit(pref[i+1])) {
-            temp += pref[i];
-            continue;
-        } else {
-            temp += pref[i];
-            operands.push(atoi(temp.c_str()));
-            temp = "";
-        }
+  TStack<int, 100> stack1;
+  std::string r = "";
+  for (int i = 0; i < pref.size(); i++) {
+    char element = pref[i];
+    if (GetPriority(element) == -1) {
+      if (pref[i] == ' ') {
+        continue;
+      } else if (isdigit(pref[i+1])) {
+        r += pref[i];
+        continue;
+      } else {
+        r += pref[i];
+        stack1.push(atoi(r.c_str()));
+        r = "";
+      }
     } else {
-        int op2 = operands.get();
-        operands.pop();
-        int op1 = operands.get();
-        operands.pop();
-        operands.push(calculate(op1, op2, ch));
-        }
+      int q = stack1.get();
+      stack1.pop();
+      int p = stack1.get();
+      stack1.pop();
+      stack1.push(schetchik(p, q, element));
     }
-    return operands.get();
+  }
+  return stack1.get();
 }
