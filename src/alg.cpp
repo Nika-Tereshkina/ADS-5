@@ -91,7 +91,7 @@ int eval(std::string pref) {
       stack1.pop();
       int p = stack1.get();
       stack1.pop();
-      stack1.push(schet(p, v, elem));
+      stack1.push(schetchik(p, v, elem));
     }
   }
   return stack1.get();
