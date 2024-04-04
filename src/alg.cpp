@@ -2,74 +2,99 @@
 #include <string>
 #include <map>
 #include "tstack.h"
-bool Oper(char c) {
-    return (c == '+' || c == '-' || c == '*' || c == '/');
-}
-int Prior(char op) {
-    if (op == '+' || op == '-') {
-        return 1;
-    } else if (op == '*' || op == '/') {
-        return 2;
-    }
-    return 0;
+int GetPriority(char c) {
+    switch (c) {
+        case '(':
+            return 0;
+        case ')':
+            return 1;
+        case '+':
+        case '-':
+            return 2;
+        case '*':
+        case '/':
+            return 3;
+        default:
+            return -1;
+   }
 }
 std::string infx2pstfx(std::string inf) {
-    TStack<char, 100> stack;
-    std::string pst;
-    int len = inf.length();
-    for (int i = 0; i < len; i++) {
-        char c = inf[i];
-        if (isspace(c)) {
-            continue;
-            } else if (isdigit(c)) {
-            pst += c;
-            pst += ' ';
-            } else if (Oper(c)) {
-            int pr = Prior(c);
-            while (!stack.isEmpty() && stack.get() != '(' && Prior(stack.get()) >= pr) {
-                pst += stack.pop();
-                pst += ' ';
+    std::string postfix, temp;
+    TStack<char, 100> operators;
+    for (auto& ch : inf) {
+    int priority = GetPriority(ch);
+    if (priority == -1) {
+            postfix += ch;
+            postfix += ' ';
+        } else {
+            char top = operators.get();
+            if (priority == 0 || GetPriority(top) < priority || operators.isEmpty()) {
+                operators.push(ch);
+            } else {
+                if (ch == ')') {
+                    while (GetPriority(top) >= priority) {
+                        postfix += top;
+                        postfix += ' ';
+                        operators.pop();
+                        top = operators.get();
+                    }
+                    operators.pop();
+                } else {
+                    while (GetPriority(top) >= priority) {
+                        postfix += top;
+                        postfix += ' ';
+                        operators.pop();
+                        top = operators.get();
+                    }
+                    operators.push(ch);
+                }
             }
-            stack.push(c);
-        } else if (c == '(') {
-            stack.push(c);
-        } else if (c == ')') {
-            while (!stack.isEmpty() && stack.get() != '(') {
-                pst += stack.pop();
-                pst += ' ';
-            }
-            stack.pop();
         }
     }
-    while (!stack.isEmpty()) {
-        pst += stack.pop();
-        pst += ' ';
+    while (!operators.isEmpty()) {
+        postfix += operators.get();
+        postfix += ' ';
+        operators.pop();
     }
-    if (!pst.empty()) {
-        pst.pop_back(); 
+    return postfix;
+}
+int calculate(const int& op1, const int& op2, const int& oper) {
+    switch (oper) {
+        case '+':
+            return op1 + op2;
+        case '-':
+            return op1 - op2;
+        case '/':
+            return op1 / op2;
+        case '*':
+            return op1 * op2;
+        default:
+            return 0;
     }
-    return pst;
 }
 int eval(std::string pref) {
-    TStack<int, 100> stack;
-    int len = pref.length();
-    for (int i = 0; i < len; i += 2) {
-        char c = pref[i];
-        if (isdigit(c)) {
-            int num = c - '0';
-            stack.push(num);
-            } else if (Oper(c)) {
-            int op2 = stack.pop();
-            int op1 = stack.pop();
-            int result;
-            switch (c) {
-                case '+': result = op1 + op2; break;
-                case '-': result = op1 - op2; break;
-                case '*': result = op1 * op2; break;
-                case '/': result = op1 / op2; break;
+    TStack<int, 100> operands;
+    std::string temp = "";
+    for (int i = 0; i < pref.size(); i++) {
+        char ch = pref[i];
+        if (GetPriority(ch) == -1) {
+            if (pref[i] == ' ') {
+                continue;
+            } else if (isdigit(pref[i+1])) {
+                temp += pref[i];
+                continue;
+            } else {
+                temp += pref[i];
+                operands.push(atoi(temp.c_str()));
+                temp = "";
             }
-            stack.push(result);
+        } else {
+            int op2 = operands.get();
+            operands.pop();
+            int op1 = operands.get();
+            operands.pop();
+            operands.push(calculate(op1, op2, ch));
         }
     }
-    return stack.pop();
+    return operands.get();
 }
